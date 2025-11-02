@@ -1,0 +1,24 @@
+{
+  "name": "discord-r2-c3po",
+  "version": "1.0.0",
+  "description": "Star Wars themed Discord bots - R2-D2 and C3P0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "./start-bots.sh",
+    "r2d2": "node r2d2-bot.js",
+    "c3po": "node c3po-bot.js",
+    "kenobi": "node kenobi-bot.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["discord", "bot", "star-wars"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1"
+  }
+}
