@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import { sharedState } from './shared-state.js';
+import { botClients } from './conversation.js';
 
 dotenv.config();
 
@@ -120,6 +121,9 @@ async function deliverFlag(user, channelId) {
 client.on('ready', () => {
   console.log(`✅ General Kenobi is online as ${client.user.tag}`);
   console.log('⚔️ Hello there! Monitoring the Force...');
+
+  // Register this bot client for the conversation
+  botClients.kenobi = client;
 
   // Check for pending flag deliveries every 2 seconds
   setInterval(async () => {

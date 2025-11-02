@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import { sharedState } from './shared-state.js';
+import { botClients } from './conversation.js';
 
 dotenv.config();
 
@@ -68,6 +69,9 @@ function getR2Response(message) {
 client.on('ready', () => {
   console.log(`✅ R2-D2 is online as ${client.user.tag}`);
   console.log('🤖 Beep boop! Ready to assist!');
+
+  // Register this bot client for the conversation
+  botClients.r2d2 = client;
 });
 
 client.on('messageCreate', async (message) => {

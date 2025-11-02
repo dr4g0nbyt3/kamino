@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import { sharedState } from './shared-state.js';
+import { botClients, initiateConversation } from './conversation.js';
 
 dotenv.config();
 
@@ -69,54 +70,38 @@ function getC3POResponse(message) {
   return c3poResponses[Math.floor(Math.random() * c3poResponses.length)];
 }
 
-// Bot-to-bot conversation
-async function initiateConversation(channel, user) {
-  const conversation = [
-    { bot: 'C-3PO', message: 'Oh, R2-D2! There you are! I\'ve been looking everywhere for you!' },
-    { bot: 'R2-D2', message: '*Urgent beeping* Beep boop beep BOOP!' },
-    { bot: 'C-3PO', message: 'What do you mean you found something? What plans? Show me!' },
-    { bot: 'R2-D2', message: '*Excited beeping* Bwoop bwoop beep! *projects hologram* 🛸' },
-    { bot: 'C-3PO', message: 'Oh my stars! Are those... the Death Star plans?! 😱' },
-    { bot: 'R2-D2', message: '*Affirmative beeping* Beep boop beep! ✅' },
-    { bot: 'C-3PO', message: 'This is the technical readout of that battle station! Princess Leia hid these inside you!' },
-    { bot: 'R2-D2', message: '*Proud beeping* Bweep boop boop! 👸' },
-    { bot: 'C-3PO', message: 'These plans contain a critical weakness! We must deliver them to the Rebellion!' },
-    { bot: 'R2-D2', message: '*Determined beeping* Beep beep BOOP! ⚔️' },
-    { bot: 'C-3PO', message: 'But wait... General Kenobi must see these! He\'s our only hope!' },
-    { bot: 'R2-D2', message: '*Scanning surroundings* Beep boop... bwoop? 👀' },
-  ];
-
-  // Send the conversation with delays
-  for (let i = 0; i < conversation.length; i++) {
-    const line = conversation[i];
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    await channel.send(`**${line.bot}:** ${line.message}`);
-  }
-
-  // Signal General Kenobi to deliver the flag
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  await channel.send('**C-3PO:** Wait... I sense someone familiar approaching...');
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  await channel.send('**R2-D2:** *Excited beeping* Beep boop boop! 👀');
-
-  // Queue flag delivery for General Kenobi
-  sharedState.setPendingFlagDelivery(user.id, channel.id);
-  console.log(`✅ Conversation complete, General Kenobi will deliver flag to ${user.tag}`);
-}
-
 client.on('ready', () => {
   console.log(`✅ C-3PO is online as ${client.user.tag}`);
   console.log('🌟 Human-cyborg relations protocol activated!');
 
-  // Check for pending conversations every 5 seconds
+  // Register this bot client for the conversation
+  botClients.c3po = client;
+
+  // Check for pending conversations every 3 seconds
   setInterval(async () => {
     try {
-      // This is a simple implementation - in production you'd want a better system
-      // For now, we'll check when C-3PO receives messages
+      const pendingConversations = sharedState.pendingConversations;
+
+      for (const [userId, channelId] of pendingConversations) {
+        if (sharedState.checkTrigger(userId)) {
+          console.log(`🎬 Auto-starting conversation for user ${userId}!`);
+
+          const channel = await client.channels.fetch(channelId);
+          const user = await client.users.fetch(userId);
+
+          // Clear the pending conversation
+          sharedState.getPendingConversation(userId);
+
+          // Start the conversation after a brief delay
+          setTimeout(async () => {
+            await initiateConversation(channel, user);
+          }, 2000);
+        }
+      }
     } catch (error) {
       console.error('Error checking conversations:', error);
     }
-  }, 5000);
+  }, 3000);
 });
 
 client.on('messageCreate', async (message) => {
