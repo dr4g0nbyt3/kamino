@@ -20,6 +20,7 @@ class SharedState {
     }
     const state = this.userInteractions.get(userId);
     state.r2d2Talked = true;
+    console.log(`🤖 [R2-D2] User ${userId} interaction recorded. State:`, state);
     this.checkTrigger(userId);
   }
 
@@ -30,6 +31,7 @@ class SharedState {
     }
     const state = this.userInteractions.get(userId);
     state.c3poTalked = true;
+    console.log(`🌟 [C-3PO] User ${userId} interaction recorded. State:`, state);
     this.checkTrigger(userId);
   }
 
@@ -40,13 +42,16 @@ class SharedState {
     }
     const state = this.userInteractions.get(userId);
     state.secretPhrase = true;
+    console.log(`⚔️ [SECRET] User ${userId} said "General Kenobi"! State:`, state);
     this.checkTrigger(userId);
   }
 
   // Check if user has triggered the conversation
   checkTrigger(userId) {
     const state = this.userInteractions.get(userId);
-    if (state && state.r2d2Talked && state.c3poTalked && state.secretPhrase) {
+    const triggered = state && state.r2d2Talked && state.c3poTalked && state.secretPhrase;
+    console.log(`🎯 [TRIGGER CHECK] User ${userId} - Triggered: ${triggered}`, state);
+    if (triggered) {
       return true;
     }
     return false;
