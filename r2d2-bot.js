@@ -49,16 +49,16 @@ const specialResponses = {
 function getR2Response(message) {
   const lowerMessage = message.content.toLowerCase();
 
+  // Check for "General Kenobi" secret phrase FIRST (before keyword check)
+  if (lowerMessage.includes('general') && lowerMessage.includes('kenobi')) {
+    sharedState.recordSecretPhrase(message.author.id);
+  }
+
   // Check for special keywords
   for (const [keyword, response] of Object.entries(specialResponses)) {
     if (lowerMessage.includes(keyword)) {
       return response;
     }
-  }
-
-  // Check for "General Kenobi" secret phrase
-  if (lowerMessage.includes('general') && lowerMessage.includes('kenobi')) {
-    sharedState.recordSecretPhrase(message.author.id);
   }
 
   // Return random response
