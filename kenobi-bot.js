@@ -129,13 +129,14 @@ client.on('ready', () => {
       for (const [userId, data] of pendingDeliveries) {
         console.log(`⚔️ General Kenobi preparing to deliver flag to user ${userId}...`);
 
+        // Clear pending delivery IMMEDIATELY to prevent duplicate processing
+        sharedState.clearPendingFlagDelivery(userId);
+
         try {
           const user = await client.users.fetch(userId);
           await deliverFlag(user, data.channelId);
-          sharedState.clearPendingFlagDelivery(userId);
         } catch (error) {
           console.error(`Error delivering flag to ${userId}:`, error);
-          sharedState.clearPendingFlagDelivery(userId);
         }
       }
     } catch (error) {
