@@ -1,9 +1,7 @@
-// Main entry point - runs all three bots together
-// This allows Railway to run all bots in a single process
+// Main entry point - runs all three bots in the same process
+// This allows them to truly share state (sharedState) in memory
 
-import { spawn } from 'child_process';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 console.log('🌟 Starting All Star Wars Discord Bots...\n');
@@ -22,58 +20,25 @@ if (!process.env.KENOBI_TOKEN) {
   process.exit(1);
 }
 
-console.log('✅ All tokens found. Launching bots...\n');
+console.log('✅ All tokens found. Launching bots in same process...\n');
 
-// Start R2-D2
-const r2d2 = spawn('node', ['r2d2-bot.js'], {
-  stdio: 'inherit',
-  env: process.env
-});
+// Import all three bots - they will all start automatically when imported
+// Since they're in the same process, they'll share the same sharedState instance
+await import('./r2d2-bot.js');
+await import('./c3po-bot.js');
+await import('./kenobi-bot.js');
 
-// Start C-3PO
-const c3po = spawn('node', ['c3po-bot.js'], {
-  stdio: 'inherit',
-  env: process.env
-});
-
-// Start General Kenobi
-const kenobi = spawn('node', ['kenobi-bot.js'], {
-  stdio: 'inherit',
-  env: process.env
-});
-
-// Handle process exits
-r2d2.on('exit', (code) => {
-  console.error(`❌ R2-D2 exited with code ${code}`);
-  process.exit(code);
-});
-
-c3po.on('exit', (code) => {
-  console.error(`❌ C-3PO exited with code ${code}`);
-  process.exit(code);
-});
-
-kenobi.on('exit', (code) => {
-  console.error(`❌ General Kenobi exited with code ${code}`);
-  process.exit(code);
-});
+console.log('🚀 All bots are running in the same process!');
+console.log('✨ Shared state is now truly shared between bots!');
+console.log('Press Ctrl+C to stop all bots.\n');
 
 // Handle termination signals
 process.on('SIGTERM', () => {
   console.log('\n🛑 Shutting down all bots...');
-  r2d2.kill();
-  c3po.kill();
-  kenobi.kill();
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
   console.log('\n🛑 Shutting down all bots...');
-  r2d2.kill();
-  c3po.kill();
-  kenobi.kill();
   process.exit(0);
 });
-
-console.log('🚀 All bots are running!');
-console.log('Press Ctrl+C to stop all bots.\n');
